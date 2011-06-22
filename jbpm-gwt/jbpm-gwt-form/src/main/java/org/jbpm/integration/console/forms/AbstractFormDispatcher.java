@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.Authenticator;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -58,7 +59,12 @@ public abstract class AbstractFormDispatcher implements FormDispatcherPlugin {
 		sb.append("/gwt-console-server/rs/form/" + getType(ref) + "/");
 		sb.append(ref.getReferenceId());
 		sb.append("/render");
-
+        String droolsUsername = properties.getProperty("drools.guvnor.auth.username");
+        String droolsPassword = properties.getProperty("drools.guvnor.auth.password");
+        if(droolsUsername!=null && !"".equals(droolsUsername)) {
+            DroolsAuthenticator droolsAuthenticator = new DroolsAuthenticator(droolsUsername, droolsPassword);
+            Authenticator.setDefault(droolsAuthenticator);
+        }
 		try {
 			return new URL(sb.toString());
 		} catch (MalformedURLException e) {
@@ -97,6 +103,12 @@ public abstract class AbstractFormDispatcher implements FormDispatcherPlugin {
 			sb.append("/drools-guvnor/org.drools.guvnor.Guvnor/package/defaultPackage/LATEST/");
 			sb.append(URLEncoder.encode(name, "UTF-8"));
 			sb.append(".drl");
+            String droolsUsername = properties.getProperty("drools.guvnor.auth.username");
+            String droolsPassword = properties.getProperty("drools.guvnor.auth.password");
+            if(droolsUsername!=null && !"".equals(droolsUsername)) {
+                DroolsAuthenticator droolsAuthenticator = new DroolsAuthenticator(droolsUsername, droolsPassword);
+                Authenticator.setDefault(droolsAuthenticator);
+            }
 			return new URL(sb.toString()).openStream();
 		} catch (Throwable t) {
 			t.printStackTrace();

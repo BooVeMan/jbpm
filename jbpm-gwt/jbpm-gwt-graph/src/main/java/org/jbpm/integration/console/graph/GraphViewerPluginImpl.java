@@ -22,6 +22,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -202,6 +204,12 @@ public class GraphViewerPluginImpl implements GraphViewerPlugin {
 			sb.append("/drools-guvnor/org.drools.guvnor.Guvnor/package/defaultPackage/LATEST/");
 			sb.append(URLEncoder.encode(processId, "UTF-8"));
 			sb.append("-image.png");
+            String droolsUsername = properties.getProperty("drools.guvnor.auth.username");
+            String droolsPassword = properties.getProperty("drools.guvnor.auth.password");
+            if(droolsUsername!=null && !"".equals(droolsUsername)) {
+                DroolsAuthenticator droolsAuthenticator = new DroolsAuthenticator(droolsUsername, droolsPassword);
+                Authenticator.setDefault(droolsAuthenticator);
+            }
 			is = new URL(sb.toString()).openStream();
 			if (is != null) {
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -251,6 +259,12 @@ public class GraphViewerPluginImpl implements GraphViewerPlugin {
 			sb.append("/drools-guvnor/org.drools.guvnor.Guvnor/package/defaultPackage/LATEST/");
 			sb.append(URLEncoder.encode(id, "UTF-8"));
 			sb.append("-image.png");
+			String droolsUsername = properties.getProperty("drools.guvnor.auth.username");
+			String droolsPassword = properties.getProperty("drools.guvnor.auth.password");
+			if(droolsUsername!=null && !"".equals(droolsUsername)) {
+			    DroolsAuthenticator droolsAuthenticator = new DroolsAuthenticator(droolsUsername, droolsPassword);
+			    Authenticator.setDefault(droolsAuthenticator);
+			}
 			URL url = new URL(sb.toString());
 			InputStream is = url.openStream();
 			if (is != null) {
@@ -268,4 +282,24 @@ public class GraphViewerPluginImpl implements GraphViewerPlugin {
 		return new ArrayList<ActiveNodeInfo>();
 	}
 
+}
+
+class DroolsAuthenticator extends Authenticator {
+    private String username;
+    private String password;
+    
+    public DroolsAuthenticator(String username, String password) {
+        this.username = username;
+        this.password = password; 
+    }
+
+    /* (non-Javadoc)
+     * @see java.net.Authenticator#getPasswordAuthentication()
+     */
+    @Override
+    public PasswordAuthentication getPasswordAuthentication() {
+        return new PasswordAuthentication(username, password.toCharArray());
+    }
+    
+    
 }
