@@ -3,12 +3,13 @@
 	<parent>
 		<artifactId>jbpm-gwt</artifactId>
 		<groupId>org.jbpm</groupId>
-		<version>5.1.0.Final</version>
+		<version>5.1.1.Final</version>
 	</parent>
 
 	<groupId>com.fisa</groupId>
 	<artifactId>jbpm-gwt-core-fisa</artifactId>
-	<version>5.1.0.Final</version>
+    <packaging>jar</packaging>
+	<!-- version>5.1.0.Final</version-->
 	<name>jBPM :: GWT Console :: Fisa</name>
 	<description>jBPM extentions for Fisa</description>
 
