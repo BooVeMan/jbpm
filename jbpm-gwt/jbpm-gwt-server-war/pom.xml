@@ -20,6 +20,11 @@
       <type>war</type>
     </dependency>
     <dependency>
+      <groupId>com.fisa</groupId>
+      <artifactId>jbpm-gwt-core-fisa</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.jbpm</groupId>
       <artifactId>jbpm-gwt-core</artifactId>
     </dependency>
