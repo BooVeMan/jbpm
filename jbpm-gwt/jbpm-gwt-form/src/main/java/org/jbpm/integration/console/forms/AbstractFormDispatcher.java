@@ -151,6 +151,7 @@ public abstract class AbstractFormDispatcher implements FormDispatcherPlugin {
 }
 
 class DroolsAuthenticator extends Authenticator {
+
     private String username;
     private String password;
     
@@ -166,6 +167,5 @@ class DroolsAuthenticator extends Authenticator {
     public PasswordAuthentication getPasswordAuthentication() {
         return new PasswordAuthentication(username, password.toCharArray());
     }
-    
     
 }
