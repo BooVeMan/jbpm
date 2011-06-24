@@ -26,6 +26,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Authenticator;
 import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -147,4 +148,24 @@ public abstract class AbstractFormDispatcher implements FormDispatcherPlugin {
 		return merged;
 	}
 
+}
+
+class DroolsAuthenticator extends Authenticator {
+    private String username;
+    private String password;
+    
+    public DroolsAuthenticator(String username, String password) {
+        this.username = username;
+        this.password = password; 
+    }
+
+    /* (non-Javadoc)
+     * @see java.net.Authenticator#getPasswordAuthentication()
+     */
+    @Override
+    public PasswordAuthentication getPasswordAuthentication() {
+        return new PasswordAuthentication(username, password.toCharArray());
+    }
+    
+    
 }
