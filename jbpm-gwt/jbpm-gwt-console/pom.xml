@@ -11,12 +11,38 @@
 	<packaging>jar</packaging>
 	<name>jBPM :: GWT Console</name>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.1</version>
+                <executions>
+                    <execution>
+                        <id>basic</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <classifier>basic</classifier>
+                            <excludes>
+                                <exclude>META-INF/services/**</exclude>
+                                <exclude>ChangeSet.xml</exclude>
+                                <exclude>jbpm.console.properties</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>org.jbpm</groupId>
 			<artifactId>jbpm-flow-builder</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.jbpm</groupId>
 			<artifactId>jbpm-human-task</artifactId>
@@ -50,6 +76,8 @@
 			<artifactId>jaxb-xjc</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+        <!-- Test -->
 		<dependency>
 			<groupId>org.codehaus.btm</groupId>
 			<artifactId>btm</artifactId>
@@ -60,7 +88,6 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
@@ -82,15 +109,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.drools</groupId>
-			<artifactId>drools-persistence-jpa</artifactId>
-			<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.jbpm</groupId>
-				<artifactId>jbpm-persistence-jpa</artifactId>
-				<scope>test</scope>
-			</dependency>
-		
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-persistence-jpa</artifactId>
+		</dependency>
 	</dependencies>
 </project>

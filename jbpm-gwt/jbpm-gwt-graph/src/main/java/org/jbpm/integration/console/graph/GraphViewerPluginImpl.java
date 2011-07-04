@@ -59,12 +59,16 @@ import org.jbpm.process.audit.ProcessInstanceDbLog;
 import org.jbpm.process.audit.ProcessInstanceLog;
 import org.jbpm.process.builder.ProcessBuilderFactoryServiceImpl;
 import org.jbpm.process.instance.ProcessRuntimeFactoryServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Kris Verlaenen
  */
 public class GraphViewerPluginImpl implements GraphViewerPlugin {
 	
+    private static Logger logger = LoggerFactory.getLogger(GraphViewerPluginImpl.class);
+    
 	private KnowledgeBase kbase;
 
 	public List<ActiveNodeInfo> getActiveNodeInfo(String instanceId) {
@@ -112,20 +116,19 @@ public class GraphViewerPluginImpl implements GraphViewerPlugin {
 			} catch (Throwable t) {
 				if (t instanceof RuntimeException
 						&& "KnowledgeAgent exception while trying to deserialize".equals(t.getMessage())) {
-					System.out.println("Could not connect to guvnor");
+					logger.warn("Could not connect to guvnor");
 					if (t.getCause() != null) {
-						System.out.println(t.getCause().getMessage());
+						logger.error(t.getCause().getMessage(), t);
 					}
 				}
-				System.out.println("Could not load processes from guvnor: " + t.getMessage());
-				t.printStackTrace();
+				logger.error("Could not load processes from guvnor: " + t.getMessage(), t);
 			}
 			if (kbase == null) {
 				kbase = KnowledgeBaseFactory.newKnowledgeBase();
 			}
 			String directory = System.getProperty("jbpm.console.directory");
-			if (directory == null) {
-				System.out.println("jbpm.console.directory property not found");
+			if (directory == null) { 
+				logger.warn("jbpm.console.directory property not found");
 			} else {
 				File file = new File(directory);
 				if (!file.exists()) {
@@ -221,7 +224,11 @@ public class GraphViewerPluginImpl implements GraphViewerPlugin {
 				return os.toByteArray();
 			}
 		} catch (Throwable t) {
-			t.printStackTrace();
+            if(t instanceof IOException && ((IOException)t).getMessage().startsWith("Server returned HTTP response code: 500 for URL")) {
+                logger.warn(t.getMessage());
+            } else {
+                logger.error(t.getMessage(), t);
+            }
 		}
 		return null;
 	}
@@ -271,7 +278,11 @@ public class GraphViewerPluginImpl implements GraphViewerPlugin {
 				return url;
 			}
 		} catch (Throwable t) {
-			t.printStackTrace();
+            if(t instanceof IOException && ((IOException)t).getMessage().startsWith("Server returned HTTP response code: 500 for URL")) {
+                logger.warn(t.getMessage());
+            } else {
+                logger.error(t.getMessage(), t);
+            }
 		}
 		return null;
 	}

@@ -37,6 +37,8 @@ import javax.activation.DataSource;
 
 import org.jboss.bpm.console.server.plugin.FormAuthorityRef;
 import org.jboss.bpm.console.server.plugin.FormDispatcherPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
@@ -46,7 +48,9 @@ import freemarker.template.Template;
  */
 public abstract class AbstractFormDispatcher implements FormDispatcherPlugin {
 
-	public URL getDispatchUrl(FormAuthorityRef ref) {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractFormDispatcher.class);
+    
+    public URL getDispatchUrl(FormAuthorityRef ref) {
 		StringBuffer sb = new StringBuffer();
 		Properties properties = new Properties();
 		try {
@@ -112,7 +116,11 @@ public abstract class AbstractFormDispatcher implements FormDispatcherPlugin {
             }
 			return new URL(sb.toString()).openStream();
 		} catch (Throwable t) {
-			t.printStackTrace();
+		    if(t instanceof IOException && ((IOException)t).getMessage().startsWith("Server returned HTTP response code: 500 for URL")) {
+		        logger.warn(t.getMessage());
+		    } else {
+                logger.error(t.getMessage(), t);
+		    }
 		}
 		return null;
 	}
