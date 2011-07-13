@@ -19,7 +19,9 @@ package com.fisa.integration.console;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,10 +55,12 @@ import org.drools.marshalling.impl.ProcessMarshallerFactory;
 import org.drools.persistence.jpa.JPAKnowledgeService;
 import org.drools.runtime.Environment;
 import org.drools.runtime.EnvironmentName;
+import org.drools.runtime.KnowledgeRuntime;
 import org.drools.runtime.KnowledgeSessionConfiguration;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.process.ProcessInstance;
 import org.drools.runtime.process.ProcessRuntimeFactory;
+import org.drools.runtime.process.WorkItemHandler;
 import org.hibernate.SessionFactory;
 import org.hibernate.ejb.EntityManagerFactoryImpl;
 import org.jbpm.bpmn2.BPMN2ProcessProviderImpl;
@@ -68,7 +72,6 @@ import org.jbpm.process.builder.ProcessBuilderFactoryServiceImpl;
 import org.jbpm.process.core.context.variable.VariableScope;
 import org.jbpm.process.instance.ProcessRuntimeFactoryServiceImpl;
 import org.jbpm.process.instance.context.variable.VariableScopeInstance;
-import org.jbpm.process.workitem.wsht.CommandBasedWSHumanTaskHandler;
 import org.jbpm.workflow.instance.impl.WorkflowProcessInstanceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -211,7 +214,6 @@ public class CommandDelegate {
                 }
             }
             new WorkingMemoryDbLogger(ksession);
-            logger.debug("Successfully loaded default package from Guvnor");
 			properties.clear();
 			try {
 				properties.load(CommandDelegate.class.getResourceAsStream("/jbpm.console.properties"));
@@ -220,15 +222,22 @@ public class CommandDelegate {
 			}
 			if(properties.getProperty("jbpm.console.task.service.host") != null &&
 			        !"".equals(properties.getProperty("jbpm.console.task.service.host"))) {
-                CommandBasedWSHumanTaskHandler handler = new CommandBasedWSHumanTaskHandler(ksession);
-    			handler.setConnection(
-    				properties.getProperty("jbpm.console.task.service.host"),
-    				new Integer(properties.getProperty("jbpm.console.task.service.port")));
-    			ksession.getWorkItemManager().registerWorkItemHandler(
-    				"Human Task", handler);
-    			handler.connect();
+			    // make it pluggable so it does not rely on human-task per default
+			    Class<?> humanTaskHandlerClass = Class.forName("org.jbpm.process.workitem.wsht.CommandBasedWSHumanTaskHandler");
+			    Object humanTaskHandler = humanTaskHandlerClass.getConstructor(KnowledgeRuntime.class).newInstance(ksession);
+			    Method setConnection = humanTaskHandlerClass.getMethod("setConnection", String.class, int.class);
+			    if(setConnection != null) {
+			        setConnection.invoke(humanTaskHandler, 
+			                properties.getProperty("jbpm.console.task.service.host"),
+			                Integer.parseInt(properties.getProperty("jbpm.console.task.service.port")));
+			    }
+    			ksession.getWorkItemManager().registerWorkItemHandler("Human Task", (WorkItemHandler)humanTaskHandler);
+                Method connect = humanTaskHandlerClass.getMethod("connect");
+                if(connect!=null) {
+                    connect.invoke(humanTaskHandler, (Object)null);
+                }
 			}
-			System.out.println("Successfully loaded default package from Guvnor");
+            logger.debug("Successfully loaded default package from Guvnor");
             return ksession;
         } catch (Throwable t) {
             throw new RuntimeException("Could not initialize stateful knowledge session: " + t.getMessage(), t);
