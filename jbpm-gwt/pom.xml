@@ -12,7 +12,7 @@
 	<name>jBPM GWT multiproject</name>
 	<description>jBPM GWT multiproject</description>
 	<properties>
-		<bpm-console.version>2.2.5.Final</bpm-console.version>
+		<bpm-console.version>2.2.6.Final</bpm-console.version>
 	</properties>
 	<modules>
 		<module>jbpm-gwt-console</module>

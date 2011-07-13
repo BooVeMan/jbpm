@@ -10,6 +10,7 @@
 	<artifactId>jbpm-flow</artifactId>
 	<name>jBPM :: Flow</name>
 	<description>jBPM Flow</description>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -39,10 +40,13 @@
 						<_removeheaders>Ignore-Package</_removeheaders>
 						<Bundle-SymbolicName>org.jbpm.flow.core;singleton:=true</Bundle-SymbolicName>
 						<Require-Bundle>org.drools.core;bundle-version="${drools.osgi.version}"</Require-Bundle>
-						<Import-Package>!org.drools.*,							<!-- java compilers are optional: only need one at most -->
-              org.codehaus.janino.*;resolution:=optional,org.eclipse.jdt.*;resolution:=optional,              *</Import-Package>
-						<Export-Package>org.jbpm.process.*,org.jbpm.workflow.*,org.jbpm.ruleflow.*,org.jbpm.marshalling.*,							<!-- add this one manually as BND seems to miss it out -->
-              org.jbpm.*</Export-Package>
+            			<Import-Package>!org.drools.*,
+              				<!-- java compilers are optional: only need one at most -->
+              				org.codehaus.janino.*;resolution:=optional,org.eclipse.jdt.*;resolution:=optional,
+              				*</Import-Package>
+            			<Export-Package>org.jbpm.process.*,org.jbpm.workflow.*,org.jbpm.ruleflow.*,org.jbpm.marshalling.*,
+              				<!-- add this one manually as BND seems to miss it out -->
+              				org.jbpm.*</Export-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
 						<Bundle-Activator>org.jbpm.osgi.flow.core.Activator</Bundle-Activator>
 					</instructions>
@@ -50,6 +54,7 @@
 			</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.drools</groupId>
