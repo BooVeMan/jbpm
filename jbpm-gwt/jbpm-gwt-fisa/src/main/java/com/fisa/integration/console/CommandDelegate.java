@@ -68,6 +68,7 @@ import org.jbpm.process.builder.ProcessBuilderFactoryServiceImpl;
 import org.jbpm.process.core.context.variable.VariableScope;
 import org.jbpm.process.instance.ProcessRuntimeFactoryServiceImpl;
 import org.jbpm.process.instance.context.variable.VariableScopeInstance;
+import org.jbpm.process.workitem.wsht.CommandBasedWSHumanTaskHandler;
 import org.jbpm.workflow.instance.impl.WorkflowProcessInstanceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +104,7 @@ public class CommandDelegate {
                 KnowledgeAgentConfiguration aconf = KnowledgeAgentFactory.newKnowledgeAgentConfiguration();
                 aconf.setProperty("drools.agent.newInstance", "false");
                 KnowledgeAgent kagent = KnowledgeAgentFactory.newKnowledgeAgent("Guvnor default", aconf);
+                kagent.setSystemEventListener(new LoggingSystemEventListener());
                 kagent.applyChangeSet(ResourceFactory.newClassPathResource("ChangeSet.xml"));
                 kbase = kagent.getKnowledgeBase();
                 for (Process process: kbase.getProcesses()) {
@@ -210,6 +212,23 @@ public class CommandDelegate {
             }
             new WorkingMemoryDbLogger(ksession);
             logger.debug("Successfully loaded default package from Guvnor");
+			properties.clear();
+			try {
+				properties.load(CommandDelegate.class.getResourceAsStream("/jbpm.console.properties"));
+			} catch (IOException e) {
+				throw new RuntimeException("Could not load jbpm.console.properties", e);
+			}
+			if(properties.getProperty("jbpm.console.task.service.host") != null &&
+			        !"".equals(properties.getProperty("jbpm.console.task.service.host"))) {
+                CommandBasedWSHumanTaskHandler handler = new CommandBasedWSHumanTaskHandler(ksession);
+    			handler.setConnection(
+    				properties.getProperty("jbpm.console.task.service.host"),
+    				new Integer(properties.getProperty("jbpm.console.task.service.port")));
+    			ksession.getWorkItemManager().registerWorkItemHandler(
+    				"Human Task", handler);
+    			handler.connect();
+			}
+			System.out.println("Successfully loaded default package from Guvnor");
             return ksession;
         } catch (Throwable t) {
             throw new RuntimeException("Could not initialize stateful knowledge session: " + t.getMessage(), t);

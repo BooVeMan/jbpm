@@ -26,8 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.InitialContext;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.transaction.Status;
+import javax.transaction.UserTransaction;
 
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
@@ -136,12 +139,20 @@ public class CommandDelegate {
 			properties.put("drools.processInstanceManagerFactory", "org.jbpm.persistence.processinstance.JPAProcessInstanceManagerFactory");
 			properties.put("drools.processSignalManagerFactory", "org.jbpm.persistence.processinstance.JPASignalManagerFactory");
 			KnowledgeSessionConfiguration config = KnowledgeBaseFactory.newKnowledgeSessionConfiguration(properties);
+            UserTransaction ut = null;
 			try {
 				System.out.println("Loading session data ...");
+	            InitialContext initContext = new InitialContext();
+                ut = (UserTransaction) initContext.lookup("java:comp/UserTransaction");
+                ut.begin();
                 ksession = JPAKnowledgeService.loadStatefulKnowledgeSession(
 					1, kbase, config, env);
+                ut.commit();
 			} catch (RuntimeException e) {
 				System.out.println("Error loading session data: " + e.getMessage());
+                if(ut != null && ut.getStatus() == Status.STATUS_ACTIVE) {
+                    ut.rollback();
+                }
 				if (e instanceof IllegalStateException) {
 				    Throwable cause = ((IllegalStateException) e).getCause();
 				    if (cause instanceof InvocationTargetException) {
@@ -166,19 +177,22 @@ public class CommandDelegate {
 				}
 			}
 			new WorkingMemoryDbLogger(ksession);
-			CommandBasedWSHumanTaskHandler handler = new CommandBasedWSHumanTaskHandler(ksession);
 			properties = new Properties();
 			try {
 				properties.load(CommandDelegate.class.getResourceAsStream("/jbpm.console.properties"));
 			} catch (IOException e) {
 				throw new RuntimeException("Could not load jbpm.console.properties", e);
 			}
-			handler.setConnection(
-				properties.getProperty("jbpm.console.task.service.host"),
-				new Integer(properties.getProperty("jbpm.console.task.service.port")));
-			ksession.getWorkItemManager().registerWorkItemHandler(
-				"Human Task", handler);
-			handler.connect();
+			if(properties.getProperty("jbpm.console.task.service.host") != null &&
+			        !"".equals(properties.getProperty("jbpm.console.task.service.host"))) {
+                CommandBasedWSHumanTaskHandler handler = new CommandBasedWSHumanTaskHandler(ksession);
+    			handler.setConnection(
+    				properties.getProperty("jbpm.console.task.service.host"),
+    				new Integer(properties.getProperty("jbpm.console.task.service.port")));
+    			ksession.getWorkItemManager().registerWorkItemHandler(
+    				"Human Task", handler);
+    			handler.connect();
+			}
 			System.out.println("Successfully loaded default package from Guvnor");
 			return ksession;
 		} catch (Throwable t) {
