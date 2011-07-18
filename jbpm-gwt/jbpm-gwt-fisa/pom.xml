@@ -17,7 +17,8 @@
 	  	<dependency>
 	  		<groupId>org.jbpm</groupId>
 	  		<artifactId>jbpm-gwt-core</artifactId>
-	  		<version>5.1.0.CR1</version>
+	  		<version>${project.version}</version>
+	  		<classifier>basic</classifier>
 	  		<exclusions>
 	  			<exclusion>
 	  				<artifactId>jbpm-human-task</artifactId>

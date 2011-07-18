@@ -18,6 +18,7 @@
 package com.fisa.integration.console;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,8 @@ import org.jboss.bpm.console.client.model.ProcessInstanceRef;
 import org.jboss.bpm.console.client.model.ProcessInstanceRef.RESULT;
 import org.jboss.bpm.console.client.model.ProcessInstanceRef.STATE;
 import org.jbpm.integration.console.Transform;
+import org.jbpm.process.audit.NodeInstanceLog;
+import org.jbpm.process.audit.ProcessInstanceDbLog;
 import org.jbpm.process.audit.ProcessInstanceLog;
 
 
@@ -75,7 +78,27 @@ public class ProcessManagement implements org.jboss.bpm.console.server.integrati
         List<ProcessInstanceLog> processInstances = delegate.getActiveProcessInstanceLogsByProcessId(definitionId);
         List<ProcessInstanceRef> result = new ArrayList<ProcessInstanceRef>();
         for (ProcessInstanceLog processInstance: processInstances) {
-            result.add(Transform.processInstance(processInstance));
+            ProcessInstanceRef processInstanceRef = Transform.processInstance(processInstance);
+            // borrowed from org.jbpm.integration.console.graph.GraphViewerPluginImpl
+            Map<String, NodeInstanceLog> nodeInstances = new HashMap<String, NodeInstanceLog>();
+            for (NodeInstanceLog nodeInstance: ProcessInstanceDbLog.findNodeInstances(processInstance.getProcessInstanceId())) {
+                if (nodeInstance.getType() == NodeInstanceLog.TYPE_ENTER) {
+                    nodeInstances.put(nodeInstance.getNodeInstanceId(), nodeInstance);
+                } else {
+                    nodeInstances.remove(nodeInstance.getNodeInstanceId());
+                }
+            }
+            if (!nodeInstances.isEmpty()) {
+                StringBuilder nodeString = new StringBuilder();
+                for (NodeInstanceLog nodeInstance: nodeInstances.values()) {
+                    if(nodeString.length() > 0 ) {
+                        nodeString.append(", ");
+                    }
+                    nodeString.append(nodeInstance.getNodeName());
+                }
+                processInstanceRef.getRootToken().setCurrentNodeName(nodeString.toString());
+            }
+            result.add(processInstanceRef);
         }
         return result;
     }
