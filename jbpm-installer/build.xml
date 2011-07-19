@@ -209,11 +209,7 @@
   <target name="download.jBPM.eclipse" depends="download.jBPM.eclipse.check" if="jBPM.eclipse.not.available">
     <echo message="Getting jBPM Eclipse ..." />
     <mkdir dir="${install.home}/lib"/>
-<<<<<<< HEAD
     <get src="http://sourceforge.net/projects/jbpm/files/jBPM%205/jbpm-5.1.1.Final/jbpm-5.1.1.Final-eclipse-all.zip/download" dest="${install.home}/lib/jbpm-${jBPM.version}-eclipse-all.zip"  />
-=======
-    <get src="http://community.jboss.org/servlet/JiveServlet/download/15922-6-25925/jbpm-5.0.0-eclipse-all.zip" dest="${install.home}/lib/jbpm-${jBPM.version}-eclipse-all.zip"  />
->>>>>>> 647e05bc5a0e71657fbf070ab0168e3172f1961e
   </target>
 
   <!-- Download Drools Eclipse plugins -->
@@ -322,17 +318,11 @@
          destfile="${install.home}/target/jbpm-gwt-console-server-${jBPM.version}.war"/>
     <copy file="${install.home}/target/jbpm-gwt-console-server-${jBPM.version}.war"
           tofile="${jboss.server.deploy.dir}/jbpm-gwt-console-server.war"
-          overwrite="true" />
-    </copy-->
-    <!--zip basedir="${install.home}/target/jbpm-gwt-console-server-war"
-         destfile="${install.home}/target/jbpm-gwt-console-server-${jBPM.version}.war"/-->
+          overwrite="true" /-->
     <copy todir="${jboss.server.deploy.dir}/jbpm-gwt-console-server.war"
           overwrite="true">
       <fileset dir="${install.home}/target/jbpm-gwt-console-server-war"/>
     </copy>
-    <!--copy file="${install.home}/target/jbpm-gwt-console-${jBPM.version}.war"
-          tofile="${jboss.server.deploy.dir}/jbpm-gwt-console.war"
-          overwrite="true" /-->
     <unzip src="${install.home}/target/jbpm-gwt-console-${jBPM.version}.war"
           dest="${jboss.server.deploy.dir}/jbpm-gwt-console.war"
           overwrite="true" />
