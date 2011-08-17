@@ -42,6 +42,7 @@ public class ProcessInstanceDbLog {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
 	public static List<ProcessInstanceLog> findActiveProcessInstances(String processId) {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.beginTransaction();
